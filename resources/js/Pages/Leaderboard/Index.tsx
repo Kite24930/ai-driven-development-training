@@ -1,12 +1,12 @@
 import { Head, usePage } from '@inertiajs/react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AppLayout from '@/Layouts/AppLayout';
 import { PageProps, User } from '@/types';
 
 export default function LeaderboardIndex({ leaderboard }: PageProps<{ leaderboard: User[] }>) {
     const { auth } = usePage<PageProps>().props;
 
     return (
-        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-gray-800">ランキング</h2>}>
+        <AppLayout header={<h2 className="text-xl font-semibold text-gray-800">ランキング</h2>}>
             <Head title="ランキング" />
             <div className="py-8">
                 <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -78,6 +78,6 @@ export default function LeaderboardIndex({ leaderboard }: PageProps<{ leaderboar
                     </div>
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </AppLayout>
     );
 }

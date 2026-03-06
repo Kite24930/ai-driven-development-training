@@ -1,4 +1,4 @@
-import { Head, useForm, Link } from '@inertiajs/react';
+import { Head, useForm, Link, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Category, Course, PageProps, TechStack } from '@/types';
 
@@ -12,7 +12,7 @@ export default function AdminCourseEdit({
     techStacks: TechStack[];
 }>) {
     const isNew = !course;
-    const { data, setData, post, put, processing, errors } = useForm({
+    const { data, setData, processing, errors } = useForm({
         title: course?.title || '',
         category_id: course?.category_id || (categories[0]?.id || ''),
         tech_stack_id: course?.tech_stack_id || (techStacks[0]?.id || ''),
@@ -27,13 +27,24 @@ export default function AdminCourseEdit({
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        const formData = new FormData();
+        Object.entries(data).forEach(([key, value]) => {
+            if (value !== null && value !== undefined) {
+                if (key === 'is_published') {
+                    formData.append(key, value ? '1' : '0');
+                } else if (value instanceof File) {
+                    formData.append(key, value);
+                } else {
+                    formData.append(key, String(value));
+                }
+            }
+        });
+
         if (isNew) {
-            post('/admin/courses', { forceFormData: true });
+            router.post('/admin/courses', formData);
         } else {
-            post(`/admin/courses/${course.id}`, {
-                forceFormData: true,
-                headers: { 'X-HTTP-Method-Override': 'PUT' },
-            });
+            formData.append('_method', 'PUT');
+            router.post(`/admin/courses/${course.id}`, formData);
         }
     };
 

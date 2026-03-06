@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AppLayout from '@/Layouts/AppLayout';
 import { Category, Course, CourseProgress, PageProps, TechStack } from '@/types';
 import { useState } from 'react';
 
@@ -27,7 +27,7 @@ export default function CategoryShow({
         : courses;
 
     return (
-        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-gray-800">{category.name}</h2>}>
+        <AppLayout header={<h2 className="text-xl font-semibold text-gray-800">{category.name}</h2>}>
             <Head title={category.name} />
             <div className="py-8">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -122,6 +122,6 @@ export default function CategoryShow({
                     )}
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </AppLayout>
     );
 }

@@ -41,9 +41,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/skill-tree', [SkillTreeController::class, 'index'])->name('skill-tree');
 
-    Route::get('/courses/{course:slug}/lessons/{lesson:slug}', [LessonController::class, 'show'])->name('lessons.show');
-    Route::post('/courses/{course:slug}/lessons/{lesson:slug}/complete', [LessonController::class, 'complete'])->name('lessons.complete');
-    Route::post('/courses/{course:slug}/lessons/{lesson:slug}/quiz', [LessonController::class, 'submitQuiz'])->name('lessons.quiz');
+    Route::get('/courses/{course:slug}/lessons/{lesson:slug}', [LessonController::class, 'show'])->scopeBindings()->name('lessons.show');
+    Route::post('/courses/{course:slug}/lessons/{lesson:slug}/complete', [LessonController::class, 'complete'])->scopeBindings()->name('lessons.complete');
+    Route::post('/courses/{course:slug}/lessons/{lesson:slug}/quiz', [LessonController::class, 'submitQuiz'])->scopeBindings()->name('lessons.quiz');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

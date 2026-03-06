@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AppLayout from '@/Layouts/AppLayout';
 import { Category, PageProps } from '@/types';
 
 const categoryIcons: Record<string, string> = {
@@ -18,7 +18,7 @@ const categoryDescriptions: Record<string, string> = {
 
 export default function CategoriesIndex({ categories }: PageProps<{ categories: Category[] }>) {
     return (
-        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-gray-800">学習カテゴリ</h2>}>
+        <AppLayout header={<h2 className="text-xl font-semibold text-gray-800">学習カテゴリ</h2>}>
             <Head title="カテゴリ一覧" />
             <div className="py-8">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -62,6 +62,6 @@ export default function CategoriesIndex({ categories }: PageProps<{ categories: 
                     </div>
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </AppLayout>
     );
 }

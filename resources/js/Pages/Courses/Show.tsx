@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AppLayout from '@/Layouts/AppLayout';
 import { Course, CourseProgress, LessonProgress, PageProps } from '@/types';
 
 const typeIcons: Record<string, string> = {
@@ -29,7 +29,7 @@ export default function CourseShow({
     const totalLessons = course.lessons?.length || 0;
 
     return (
-        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-gray-800">{course.title}</h2>}>
+        <AppLayout header={<h2 className="text-xl font-semibold text-gray-800">{course.title}</h2>}>
             <Head title={course.title} />
             <div className="py-8">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -169,6 +169,6 @@ export default function CourseShow({
                     </div>
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </AppLayout>
     );
 }
