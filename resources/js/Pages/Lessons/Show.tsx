@@ -15,19 +15,24 @@ export default function LessonShow({
     lesson,
     progress,
     allProgress,
+    quizAlreadySubmitted,
 }: PageProps<{
     course: Course;
     lesson: Lesson;
     progress: LessonProgress | null;
     allProgress: Record<number, LessonProgress>;
+    quizAlreadySubmitted: boolean;
 }>) {
     const { flash } = usePage<PageProps>().props;
     const [quizAnswers, setQuizAnswers] = useState<Record<number, number>>({});
-    const [quizSubmitted, setQuizSubmitted] = useState(false);
+    const [quizSubmitted, setQuizSubmitted] = useState(quizAlreadySubmitted || false);
     const [showXpAnimation, setShowXpAnimation] = useState(false);
 
     const isCompleted = progress?.status === 'completed';
     const quizResult = flash?.quizResult;
+    // Get correct answers from flash (after submission) or from quiz data (if already submitted before)
+    const correctAnswers: Record<number, { correct_option: number; explanation: string }> =
+        quizResult?.correctAnswers || {};
 
     useEffect(() => {
         if (quizResult) {
@@ -170,44 +175,51 @@ export default function LessonShow({
                                         )}
 
                                         <div className="space-y-6">
-                                            {lesson.quizzes.map((quiz, qIdx) => (
-                                                <div key={quiz.id} className="p-4 border border-gray-100 rounded-xl">
-                                                    <div className="font-medium mb-3">
-                                                        Q{qIdx + 1}. {quiz.question}
-                                                    </div>
-                                                    <div className="space-y-2">
-                                                        {quiz.options.map((opt, oIdx) => {
-                                                            const isSelected = quizAnswers[quiz.id] === oIdx;
-                                                            const isCorrect = quizSubmitted && oIdx === quiz.correct_option;
-                                                            const isWrong = quizSubmitted && isSelected && oIdx !== quiz.correct_option;
+                                            {lesson.quizzes.map((quiz, qIdx) => {
+                                                // Use correct answer from flash data or from quiz (when pre-loaded for already-submitted)
+                                                const ca = correctAnswers[quiz.id];
+                                                const correctOpt = ca?.correct_option ?? quiz.correct_option;
+                                                const explanation = ca?.explanation ?? quiz.explanation;
 
-                                                            return (
-                                                                <button
-                                                                    key={oIdx}
-                                                                    onClick={() => !quizSubmitted && setQuizAnswers({ ...quizAnswers, [quiz.id]: oIdx })}
-                                                                    disabled={quizSubmitted}
-                                                                    className={`w-full text-left p-3 rounded-lg border transition text-sm ${
-                                                                        isCorrect
-                                                                            ? 'border-green-500 bg-green-50 text-green-700'
-                                                                            : isWrong
-                                                                            ? 'border-red-500 bg-red-50 text-red-700'
-                                                                            : isSelected
-                                                                            ? 'border-purple-500 bg-purple-50'
-                                                                            : 'border-gray-200 hover:border-gray-300'
-                                                                    }`}
-                                                                >
-                                                                    {opt}
-                                                                </button>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                    {quizSubmitted && quiz.explanation && (
-                                                        <div className="mt-3 p-3 bg-blue-50 rounded-lg text-sm text-blue-700">
-                                                            {quiz.explanation}
+                                                return (
+                                                    <div key={quiz.id} className="p-4 border border-gray-100 rounded-xl">
+                                                        <div className="font-medium mb-3">
+                                                            Q{qIdx + 1}. {quiz.question}
                                                         </div>
-                                                    )}
-                                                </div>
-                                            ))}
+                                                        <div className="space-y-2">
+                                                            {quiz.options.map((opt, oIdx) => {
+                                                                const isSelected = quizAnswers[quiz.id] === oIdx;
+                                                                const isCorrect = quizSubmitted && correctOpt !== undefined && oIdx === correctOpt;
+                                                                const isWrong = quizSubmitted && isSelected && correctOpt !== undefined && oIdx !== correctOpt;
+
+                                                                return (
+                                                                    <button
+                                                                        key={oIdx}
+                                                                        onClick={() => !quizSubmitted && setQuizAnswers({ ...quizAnswers, [quiz.id]: oIdx })}
+                                                                        disabled={quizSubmitted}
+                                                                        className={`w-full text-left p-3 rounded-lg border transition text-sm ${
+                                                                            isCorrect
+                                                                                ? 'border-green-500 bg-green-50 text-green-700'
+                                                                                : isWrong
+                                                                                ? 'border-red-500 bg-red-50 text-red-700'
+                                                                                : isSelected
+                                                                                ? 'border-purple-500 bg-purple-50'
+                                                                                : 'border-gray-200 hover:border-gray-300'
+                                                                        }`}
+                                                                    >
+                                                                        {opt}
+                                                                    </button>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                        {quizSubmitted && explanation && (
+                                                            <div className="mt-3 p-3 bg-blue-50 rounded-lg text-sm text-blue-700">
+                                                                {explanation}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
 
                                         {!quizSubmitted && (

@@ -25,6 +25,6 @@ class Skill extends Model
 
     public function children(): HasMany
     {
-        return $this->hasMany(Skill::class, 'parent_skill_id');
+        return $this->hasMany(Skill::class, 'parent_skill_id')->with('children', 'category');
     }
 }

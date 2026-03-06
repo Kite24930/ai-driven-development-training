@@ -21,6 +21,7 @@ class LessonController extends Controller
         $user = auth()->user();
         $progress = null;
         $allProgress = [];
+        $quizAlreadySubmitted = false;
 
         if ($user) {
             $progress = LessonProgress::firstOrCreate(
@@ -31,6 +32,8 @@ class LessonController extends Controller
             if ($progress->status === 'not_started') {
                 $progress->update(['status' => 'in_progress', 'started_at' => now()]);
             }
+
+            $quizAlreadySubmitted = $progress->quiz_score !== null;
 
             $allProgress = $user->lessonProgress()
                 ->whereIn('lesson_id', $course->lessons->pluck('id'))
@@ -44,11 +47,19 @@ class LessonController extends Controller
             );
         }
 
+        // Hide correct answers from quizzes if not yet submitted
+        if (!$quizAlreadySubmitted && $lesson->quizzes) {
+            $lesson->quizzes->each(function ($quiz) {
+                $quiz->makeHidden(['correct_option', 'explanation']);
+            });
+        }
+
         return Inertia::render('Lessons/Show', [
             'course' => $course,
             'lesson' => $lesson,
             'progress' => $progress,
             'allProgress' => $allProgress,
+            'quizAlreadySubmitted' => $quizAlreadySubmitted,
         ]);
     }
 
@@ -95,10 +106,10 @@ class LessonController extends Controller
             }
 
             // Update streak
-            $today = now()->toDateString();
-            if ($user->last_activity_date !== $today) {
-                $yesterday = now()->subDay()->toDateString();
-                $streak = ($user->last_activity_date && $user->last_activity_date->toDateString() === $yesterday)
+            $today = now()->startOfDay();
+            if (!$user->last_activity_date || !$user->last_activity_date->isSameDay($today)) {
+                $yesterday = now()->subDay();
+                $streak = ($user->last_activity_date && $user->last_activity_date->isSameDay($yesterday))
                     ? $user->streak_days + 1
                     : 1;
                 $user->update([
@@ -142,12 +153,22 @@ class LessonController extends Controller
             $user->addXp($xpEarned, 'quiz', $lesson->id, "クイズで{$correct}/{$total}問正解");
         }
 
+        // Build correct answers map for frontend display
+        $correctAnswers = [];
+        foreach ($quizzes as $quiz) {
+            $correctAnswers[$quiz->id] = [
+                'correct_option' => $quiz->correct_option,
+                'explanation' => $quiz->explanation,
+            ];
+        }
+
         return back()->with([
             'quizResult' => [
                 'correct' => $correct,
                 'total' => $total,
                 'score' => $score,
                 'xpEarned' => $xpEarned,
+                'correctAnswers' => $correctAnswers,
             ],
         ]);
     }
