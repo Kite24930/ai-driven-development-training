@@ -126,6 +126,7 @@ class LessonController extends Controller
     {
         $validated = $request->validate([
             'answers' => 'required|array',
+            'answers.*' => 'required|integer|min:0',
         ]);
 
         $user = $request->user();

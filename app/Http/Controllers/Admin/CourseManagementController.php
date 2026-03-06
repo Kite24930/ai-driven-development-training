@@ -50,7 +50,7 @@ class CourseManagementController extends Controller
             'estimated_hours' => 'required|integer|min:1',
             'xp_reward' => 'required|integer|min:0',
             'is_published' => 'boolean',
-            'thumbnail' => 'nullable|image|max:2048',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,gif,webp|max:2048',
         ]);
 
         $validated['slug'] = Str::slug($validated['title']) . '-' . Str::random(5);
@@ -85,7 +85,7 @@ class CourseManagementController extends Controller
             'estimated_hours' => 'required|integer|min:1',
             'xp_reward' => 'required|integer|min:0',
             'is_published' => 'boolean',
-            'thumbnail' => 'nullable|image|max:2048',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,gif,webp|max:2048',
         ]);
 
         if ($request->hasFile('thumbnail')) {

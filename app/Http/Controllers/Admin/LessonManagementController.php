@@ -41,9 +41,18 @@ class LessonManagementController extends Controller
             'quizzes' => 'nullable|array',
             'quizzes.*.question' => 'required_with:quizzes|string',
             'quizzes.*.options' => 'required_with:quizzes|array|min:2',
-            'quizzes.*.correct_option' => 'required_with:quizzes|integer',
+            'quizzes.*.correct_option' => 'required_with:quizzes|integer|min:0',
             'quizzes.*.explanation' => 'nullable|string',
         ]);
+
+        // Validate correct_option is within bounds of options array
+        if (!empty($validated['quizzes'])) {
+            foreach ($validated['quizzes'] as $i => $quiz) {
+                if (isset($quiz['correct_option'], $quiz['options']) && $quiz['correct_option'] >= count($quiz['options'])) {
+                    return back()->withErrors(["quizzes.{$i}.correct_option" => '正解の選択肢がオプション数を超えています']);
+                }
+            }
+        }
 
         $validated['slug'] = Str::slug($validated['title']) . '-' . Str::random(5);
         $validated['sort_order'] = $course->lessons()->count();
@@ -88,9 +97,18 @@ class LessonManagementController extends Controller
             'quizzes' => 'nullable|array',
             'quizzes.*.question' => 'required_with:quizzes|string',
             'quizzes.*.options' => 'required_with:quizzes|array|min:2',
-            'quizzes.*.correct_option' => 'required_with:quizzes|integer',
+            'quizzes.*.correct_option' => 'required_with:quizzes|integer|min:0',
             'quizzes.*.explanation' => 'nullable|string',
         ]);
+
+        // Validate correct_option is within bounds of options array
+        if (!empty($validated['quizzes'])) {
+            foreach ($validated['quizzes'] as $i => $quiz) {
+                if (isset($quiz['correct_option'], $quiz['options']) && $quiz['correct_option'] >= count($quiz['options'])) {
+                    return back()->withErrors(["quizzes.{$i}.correct_option" => '正解の選択肢がオプション数を超えています']);
+                }
+            }
+        }
 
         $lesson->update(collect($validated)->except('quizzes')->toArray());
 
@@ -122,12 +140,17 @@ class LessonManagementController extends Controller
     {
         $validated = $request->validate([
             'lessons' => 'required|array',
-            'lessons.*.id' => 'required|exists:lessons,id',
+            'lessons.*.id' => 'required|integer',
             'lessons.*.sort_order' => 'required|integer',
         ]);
 
+        // Only update lessons that belong to this course
+        $courseLessonIds = $course->lessons()->pluck('id')->toArray();
+
         foreach ($validated['lessons'] as $item) {
-            Lesson::where('id', $item['id'])->update(['sort_order' => $item['sort_order']]);
+            if (in_array($item['id'], $courseLessonIds)) {
+                Lesson::where('id', $item['id'])->update(['sort_order' => $item['sort_order']]);
+            }
         }
 
         return back()->with('success', '順序を更新しました');
